@@ -13,6 +13,8 @@ return [
     'allowed_origins' => [
         'http://localhost:9000',      // 前端開發用
         'http://127.0.0.1:9000',      // 前端開發用
+        'https://localhost',           // Capacitor WebView
+        'capacitor://localhost', 
     ],
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
