@@ -21,7 +21,7 @@ return [
 
     // 'allowed_origins' => ['*'],
     // 或前端實際域名
-    'allowed_origins' => ['http://localhost:9000','http://127.0.0.1:9000','https://edwinalaravel12.onrender.com'], 
+    'allowed_origins' => ['http://localhost:9000','http://127.0.0.1:9000'], 
     'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'],
