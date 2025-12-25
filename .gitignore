@@ -1,4 +1,6 @@
 *.log
+*.sshid_edwina009_web
+*.sshid_edwina009_web.pub
 .DS_Store
 .env
 .env.backup
