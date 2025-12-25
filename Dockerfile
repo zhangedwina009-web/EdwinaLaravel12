@@ -1,21 +1,30 @@
-FROM php:8.4-fpm
+# Dockerfile
+FROM php:8.4-cli
 
-# 安裝依賴
 RUN apt-get update && apt-get install -y \
-    libpq-dev libzip-dev unzip git \
-    && docker-php-ext-install pdo_pgsql pdo_mysql zip
+    git unzip libpng-dev libonig-dev libxml2-dev libzip-dev libicu-dev zip \
+    && docker-php-ext-install pdo_mysql mbstring bcmath gd zip intl
 
-# 設定工作目錄
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
 WORKDIR /var/www
 
-# 複製 composer 文件先安裝套件
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader
-
-# 複製其餘專案（不包含 .env）
+# ⚠️ 先複製全部專案 (artisan、config、.env.example)
 COPY . .
 
-# 設定權限
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+# Composer install 只安裝 production 套件
+RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-dev --optimize-autoloader
 
-CMD ["php-fpm"]
+# 設定權限
+RUN chown -R www-data:www-data storage bootstrap/cache
+
+# 複製 .env.example 為 .env 並生成 APP_KEY
+RUN cp .env.example .env && php artisan key:generate
+
+# 設定權限
+RUN chmod -R 777 storage bootstrap/cache
+
+
+EXPOSE 8000
+
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
