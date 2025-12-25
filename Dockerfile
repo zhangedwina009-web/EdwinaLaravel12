@@ -1,33 +1,21 @@
-# Dockerfile
-FROM php:8.4-cli
+FROM php:8.4-fpm
 
-# 安裝必要套件
+# 安裝依賴
 RUN apt-get update && apt-get install -y \
-    git unzip libpng-dev libonig-dev libxml2-dev libzip-dev libicu-dev zip libpq-dev \
-    && docker-php-ext-install pdo_mysql pdo_pgsql mbstring bcmath gd zip intl
+    libpq-dev libzip-dev unzip git \
+    && docker-php-ext-install pdo_pgsql pdo_mysql zip
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
+# 設定工作目錄
 WORKDIR /var/www
 
-# ⚠️ 先複製全部專案 (artisan、config、.env.example)
+# 複製 composer 文件先安裝套件
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --optimize-autoloader
+
+# 複製其餘專案（不包含 .env）
 COPY . .
 
-# Composer install 只安裝 production 套件
-RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-dev --optimize-autoloader
-
 # 設定權限
-RUN chown -R www-data:www-data storage bootstrap/cache
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# 複製 .env.example 為 .env 並生成 APP_KEY
-# RUN cp .env.example .env && php artisan key:generate
-
-# 設定權限
-RUN chmod -R 777 storage bootstrap/cache
-
-RUN php artisan key:generate || true
-
-EXPOSE 8000
-# CMD ["sh", "-c", "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000"]
-
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+CMD ["php-fpm"]
