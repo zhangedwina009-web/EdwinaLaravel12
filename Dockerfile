@@ -20,7 +20,7 @@ RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-dev --optimize-autoloader
 RUN chown -R www-data:www-data storage bootstrap/cache
 
 # 複製 .env.example 為 .env 並生成 APP_KEY
-RUN cp .env.example .env && php artisan key:generate
+# RUN cp .env.example .env && php artisan key:generate
 
 # 設定權限
 RUN chmod -R 777 storage bootstrap/cache
